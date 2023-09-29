@@ -13,10 +13,12 @@ use std::ptr;
 
 use std::mem;
 
-unsafe trait DynTypeInfo: Any {
+unsafe trait DynTypeInfo {
 	fn name(&self) -> &'static str;
 
 	fn type_id_ref(&self) -> &'static TypeId;
+
+	fn type_id(&self) -> TypeId;
 }
 
 #[repr(C, align(1))]
@@ -38,6 +40,9 @@ unsafe impl<T: ?Sized + Any> DynTypeInfo for TypeCarrier<T> {
 	}
 	fn type_id_ref(&self) -> &'static TypeId {
 		&const { TypeId::of::<T>() }
+	}
+	fn type_id(&self) -> TypeId {
+		TypeId::of::<T>()
 	}
 }
 
@@ -93,29 +98,11 @@ const _: () = {
 
 #[cfg(test)]
 #[test]
-fn any_map() {
-	use std::collections::HashMap;
+fn basic() {
+	let type_info = TypeInfo::new::<String>();
 
-	#[derive(Default)]
-	struct AnyMap {
-		map: HashMap<TypeInfo, Box<dyn Any>>,
-	}
+	assert_eq!(type_info.type_id(), TypeId::of::<String>());
+	assert_eq!(type_info.name(), "alloc::string::String");
 
-	impl AnyMap {
-		fn insert<T: Any>(&mut self, item: T) -> Option<Box<T>> {
-			self.map.insert(TypeInfo::from(&item), Box::new(item)).map(|item| item.downcast().unwrap())
-		}
-		fn get<T: Any>(&self) -> Option<&T> {
-			self.map.get(&TypeInfo::new::<T>()).map(|item| item.downcast_ref().unwrap())
-		}
-	}
-
-	let mut t = AnyMap::default();
-
-	t.insert(String::from("foo"));
-
-	let i = t.get::<String>().unwrap();
-
-	assert_eq!(i, "foo");
 }
 
