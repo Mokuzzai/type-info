@@ -51,6 +51,40 @@ pub struct TypeInfo {
 	carrier: DynMetadata<dyn DynTypeInfo>,
 }
 
+impl PartialEq for TypeInfo {
+	fn eq(&self, other: &Self) -> bool {
+		self.type_id_ref().eq(other.type_id_ref())
+	}
+	fn ne(&self, other: &Self) -> bool {
+		self.type_id_ref().ne(other.type_id_ref())
+	}
+}
+
+impl Eq for TypeInfo {}
+
+use std::cmp::Ordering;
+
+impl PartialOrd for TypeInfo {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		self.type_id_ref().partial_cmp(other.type_id_ref())
+	}
+}
+
+impl Ord for TypeInfo {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.type_id_ref().cmp(other.type_id_ref())
+	}
+}
+
+use std::hash::Hasher;
+use std::hash::Hash;
+
+impl Hash for TypeInfo {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.type_id_ref().hash(state)
+	}
+}
+
 impl TypeInfo {
 	pub fn new<T: ?Sized + Any>() -> Self {
 		Self {
@@ -76,14 +110,14 @@ impl TypeInfo {
 		self.type_id() == TypeId::of::<T>()
 	}
 }
-/*
-NOTE: this is probably too error-prone
 
-impl<'a, T: Any> From<&'a T> for TypeInfo {
-	fn from(carrier: &'a T) -> Self {
-		Self::new::<T>()
-	}
-}*/
+// NOTE: this is probably too error-prone
+//
+// impl<'a, T: Any> From<&'a T> for TypeInfo {
+// 	fn from(carrier: &'a T) -> Self {
+// 		Self::new::<T>()
+// 	}
+// }
 
 const _: () = {
 	use std::fmt::*;
@@ -105,6 +139,5 @@ fn basic() {
 
 	assert_eq!(type_info.type_id(), TypeId::of::<String>());
 	assert_eq!(type_info.name(), "alloc::string::String");
-
 }
 
