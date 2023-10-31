@@ -46,7 +46,7 @@ unsafe impl<T: ?Sized + Any> DynTypeInfo for TypeCarrier<T> {
 	}
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone)] // TODO: delegate `Ord` + `Hash` to `Self::type_id`
 pub struct TypeInfo {
 	carrier: DynMetadata<dyn DynTypeInfo>,
 }
@@ -76,12 +76,14 @@ impl TypeInfo {
 		self.type_id() == TypeId::of::<T>()
 	}
 }
+/*
+NOTE: this is probably too error-prone
 
 impl<'a, T: Any> From<&'a T> for TypeInfo {
 	fn from(carrier: &'a T) -> Self {
 		Self::new::<T>()
 	}
-}
+}*/
 
 const _: () = {
 	use std::fmt::*;
