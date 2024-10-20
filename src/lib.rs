@@ -13,6 +13,16 @@ use std::ptr;
 
 use std::mem;
 
+pub unsafe trait AnyExt: Any {
+	fn type_info(&self) -> TypeInfo;
+}
+
+impl<T: ?Sized + Any> AnyExt for T {
+	fn type_info(&self) -> TypeInfo {
+		TypeInfo::new::<T>()
+	}
+}
+
 unsafe trait DynTypeInfo {
 	fn name(&self) -> &'static str;
 
