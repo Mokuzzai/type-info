@@ -17,7 +17,7 @@ pub unsafe trait AnyExt: Any {
 	fn type_info(&self) -> TypeInfo;
 }
 
-impl<T: ?Sized + Any> AnyExt for T {
+unsafe impl<T: ?Sized + Any> AnyExt for T {
 	fn type_info(&self) -> TypeInfo {
 		TypeInfo::new::<T>()
 	}
